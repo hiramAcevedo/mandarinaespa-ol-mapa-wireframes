@@ -445,9 +445,9 @@
         <div class="ctrl-group">
             <span class="ctrl-label">Dir:</span>
             <div class="btn-group" id="dirBtnGroup">
-                <button onclick="setDirection('TB')" data-dir="TB" title="Arriba → Abajo">↓ TB</button>
+                <button onclick="setDirection('TB')" data-dir="TB" title="Arriba → Abajo" class="active">↓ TB</button>
                 <button onclick="setDirection('BT')" data-dir="BT" title="Abajo → Arriba">↑ BT</button>
-                <button onclick="setDirection('LR')" data-dir="LR" title="Izquierda → Derecha" class="active">→ LR</button>
+                <button onclick="setDirection('LR')" data-dir="LR" title="Izquierda → Derecha">→ LR</button>
                 <button onclick="setDirection('RL')" data-dir="RL" title="Derecha → Izquierda">← RL</button>
             </div>
         </div>
@@ -477,7 +477,7 @@
 </div>
 
 <!-- ══ Direction badge ══ -->
-<div class="dir-badge" id="dirBadge">flowchart LR</div>
+<div class="dir-badge" id="dirBadge">flowchart TB</div>
 
 <!-- ══ Canvas ══ -->
 <div class="canvas-wrap" id="canvasWrap">
@@ -605,7 +605,7 @@
     var lastTranslateX = 0;
     var lastTranslateY = 0;
 
-    var currentDirection = 'LR';
+    var currentDirection = 'TB';
     var isViewLocked = false;
     var isDragNodesEnabled = false;
 
@@ -767,49 +767,128 @@
     }
 
     // ═══════════════════════════════════════════
-    //  COMPACT TREE RENDERER (TB / BT)
+    //  COMPACT TREE RENDERER (all directions)
     // ═══════════════════════════════════════════
     function renderCompactTree(direction) {
         var NODE_H = 32, PAD = 16, VGAP = 6, COL_GAP = 22, INDENT = 18, ROOT_GAP = 55;
-        var isBT = (direction === 'BT');
+        var isVertical = (direction === 'TB' || direction === 'BT');
+        var isReversed = (direction === 'BT' || direction === 'RL');
 
         // Deep clone tree
         var root = JSON.parse(JSON.stringify(TREE_DATA));
         var cols = root.children;
 
-        // Column widths based on widest label in each subtree
-        var colWidths = [];
+        // Column sizes based on widest label in each subtree
+        var colSizes = [];
         for (var c = 0; c < cols.length; c++) {
-            colWidths.push(Math.max(130, subtreeMaxWidth(cols[c], 0, PAD, INDENT)));
+            colSizes.push(Math.max(130, subtreeMaxWidth(cols[c], 0, PAD, INDENT)));
         }
 
-        // Layout each column vertically
-        var x = 0, maxBottom = 0;
-        for (var c = 0; c < cols.length; c++) {
-            var items = [];
-            flattenTree(cols[c], 0, items);
-            var colW = colWidths[c];
-            var y = ROOT_GAP + NODE_H;
-            for (var i = 0; i < items.length; i++) {
-                var indent = items[i].depth * INDENT;
-                items[i].node._x = x + indent;
-                items[i].node._y = y;
-                items[i].node._w = colW - indent;
-                items[i].node._h = NODE_H;
-                y += NODE_H + VGAP;
+        var totalW, totalH;
+
+        if (isVertical) {
+            // ── TB / BT: columns go left-to-right, nodes stack downward ──
+            var x = 0, maxBottom = 0;
+            for (var c = 0; c < cols.length; c++) {
+                var items = [];
+                flattenTree(cols[c], 0, items);
+                var colW = colSizes[c];
+                var y = ROOT_GAP + NODE_H;
+                for (var i = 0; i < items.length; i++) {
+                    var indent = items[i].depth * INDENT;
+                    items[i].node._x = x + indent;
+                    items[i].node._y = y;
+                    items[i].node._w = colW - indent;
+                    items[i].node._h = NODE_H;
+                    y += NODE_H + VGAP;
+                }
+                maxBottom = Math.max(maxBottom, y);
+                x += colW + COL_GAP;
             }
-            maxBottom = Math.max(maxBottom, y);
-            x += colW + COL_GAP;
-        }
-        var totalW = x - COL_GAP;
-        var totalH = maxBottom + 20;
+            totalW = x - COL_GAP;
+            totalH = maxBottom + 20;
 
-        // Position root centered
-        var rootW = Math.max(200, measureLabel(root.label) + PAD * 2);
-        root._x = (totalW - rootW) / 2;
-        root._y = 0;
-        root._w = rootW;
-        root._h = NODE_H;
+            // Root centered above columns
+            var rootW = Math.max(200, measureLabel(root.label) + PAD * 2);
+            root._x = (totalW - rootW) / 2;
+            root._y = 0;
+            root._w = rootW;
+            root._h = NODE_H;
+        } else {
+            // ── LR / RL: root LEFT, branches next to root, sub-columns BELOW ──
+            // Branch at top of block, sub-columns below with horizontal spread
+            var rootW = Math.max(200, measureLabel(root.label) + PAD * 2);
+            var BLOCK_GAP = 20;
+            var SUB_TOP = NODE_H + 10; // vertical gap from branch to sub-columns
+
+            // All branches at same X
+            var maxBranchW = 130;
+            for (var c = 0; c < cols.length; c++) {
+                maxBranchW = Math.max(maxBranchW, measureLabel(cols[c].label) + PAD * 2);
+            }
+            var branchX = rootW + ROOT_GAP;
+
+            var blockY = 0;
+            var maxRight = 0;
+
+            for (var c = 0; c < cols.length; c++) {
+                var branch = cols[c];
+
+                if (!branch.children || branch.children.length === 0) {
+                    branch._x = branchX;
+                    branch._y = blockY;
+                    branch._w = maxBranchW;
+                    branch._h = NODE_H;
+                    maxRight = Math.max(maxRight, branchX + maxBranchW);
+                    blockY += NODE_H + BLOCK_GAP;
+                    continue;
+                }
+
+                // Branch at top of block
+                branch._x = branchX;
+                branch._y = blockY;
+                branch._w = maxBranchW;
+                branch._h = NODE_H;
+
+                // Compute sub-column widths
+                var subColWidths = [];
+                for (var sc = 0; sc < branch.children.length; sc++) {
+                    subColWidths.push(Math.max(100, subtreeMaxWidth(branch.children[sc], 0, PAD, INDENT)));
+                }
+
+                // Layout sub-columns horizontally, BELOW the branch
+                var subX = branchX;
+                var maxSubBottom = 0;
+                for (var sc = 0; sc < branch.children.length; sc++) {
+                    var items = [];
+                    flattenTree(branch.children[sc], 0, items);
+                    var subW = subColWidths[sc];
+                    var y = SUB_TOP;
+                    for (var i = 0; i < items.length; i++) {
+                        var indent = items[i].depth * INDENT;
+                        items[i].node._x = subX + indent;
+                        items[i].node._y = blockY + y;
+                        items[i].node._w = subW - indent;
+                        items[i].node._h = NODE_H;
+                        y += NODE_H + VGAP;
+                    }
+                    maxSubBottom = Math.max(maxSubBottom, y);
+                    subX += subW + COL_GAP;
+                }
+
+                maxRight = Math.max(maxRight, subX - COL_GAP);
+                blockY += maxSubBottom + BLOCK_GAP;
+            }
+
+            totalW = maxRight + 20;
+            totalH = blockY - BLOCK_GAP + 20;
+
+            // Root centered vertically on the left
+            root._x = 0;
+            root._y = (totalH - NODE_H) / 2;
+            root._w = rootW;
+            root._h = NODE_H;
+        }
 
         // Collect all nodes & edges
         var allNodes = [], allEdges = [];
@@ -824,10 +903,17 @@
         }
         collect(root);
 
-        // BT: flip all Y coordinates
-        if (isBT) {
-            for (var n = 0; n < allNodes.length; n++)
-                allNodes[n]._y = totalH - allNodes[n]._y - allNodes[n]._h;
+        // Reversed directions: flip coordinates
+        if (isReversed) {
+            if (isVertical) {
+                // BT: flip Y
+                for (var n = 0; n < allNodes.length; n++)
+                    allNodes[n]._y = totalH - allNodes[n]._y - allNodes[n]._h;
+            } else {
+                // RL: flip X
+                for (var n = 0; n < allNodes.length; n++)
+                    allNodes[n]._x = totalW - allNodes[n]._x - allNodes[n]._w;
+            }
         }
 
         // ── Build SVG ──
@@ -840,20 +926,7 @@
         s.push('<g class="edgePaths">');
         for (var e = 0; e < allEdges.length; e++) {
             var p = allEdges[e].parent, ch = allEdges[e].child;
-            var pcx = p._x + p._w/2, ccx = ch._x + ch._w/2;
-            var d;
-            if (p.type === 'root') {
-                var py = isBT ? p._y : p._y + p._h;
-                var cy = isBT ? ch._y + ch._h : ch._y;
-                var midY = (py + cy) / 2;
-                d = 'M'+pcx+','+py+' L'+pcx+','+midY+' L'+ccx+','+midY+' L'+ccx+','+cy;
-            } else {
-                var spX = p._x + 8;
-                var py = isBT ? p._y : p._y + p._h;
-                var chCy = ch._y + ch._h/2;
-                var chL = ch._x - 3;
-                d = 'M'+spX+','+py+' L'+spX+','+chCy+' L'+chL+','+chCy;
-            }
+            var d = buildEdgePath(p, ch, direction);
             s.push('<g class="edgePath"><path fill="none" stroke="#aaa" stroke-width="1.2" d="'+d+'"/></g>');
         }
         s.push('</g>');
@@ -868,7 +941,9 @@
             else                       { fill='#fff';    stroke='#ccc';    tf='#1a1a2e'; fw='400'; }
 
             var cx = nd._x + nd._w/2, cy = nd._y + nd._h/2;
-            var dr = nd.type==='root' ? ' data-root="1"' : '';
+            var dr = '';
+            if (nd.type==='root') dr = ' data-root="1"';
+            else if (nd.type==='main') dr = ' data-main="1"';
             s.push('<g class="node" id="ct-'+nd.id+'"'+dr+' transform="translate('+cx+','+cy+')">');
             s.push('<rect x="'+(-nd._w/2)+'" y="'+(-nd._h/2)+'" width="'+nd._w+'" height="'+nd._h+'" rx="6" ry="6" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.5"/>');
             s.push('<text fill="'+tf+'" font-family="\'Segoe UI\',system-ui,sans-serif" font-size="11" font-weight="'+fw+'" text-anchor="middle" dominant-baseline="central">'+escapeHtml(nd.label)+'</text>');
@@ -884,6 +959,48 @@
         loadingOverlay.classList.remove('active');
         dirBadge.textContent = 'flowchart ' + currentDirection;
         setTimeout(function() { buildEdgeMap(); resetView(); }, 150);
+    }
+
+    // Edge path builder for compact tree
+    function buildEdgePath(p, ch, direction) {
+        var pcx = p._x + p._w/2, pcy = p._y + p._h/2;
+        var ccx = ch._x + ch._w/2, ccy = ch._y + ch._h/2;
+
+        if (p.type === 'root') {
+            if (direction === 'TB' || direction === 'BT') {
+                // TB/BT: vertical step from root
+                var py = (direction==='BT') ? p._y : p._y + p._h;
+                var cy = (direction==='BT') ? ch._y + ch._h : ch._y;
+                var midY = (py + cy) / 2;
+                return 'M'+pcx+','+py+' L'+pcx+','+midY+' L'+ccx+','+midY+' L'+ccx+','+cy;
+            } else {
+                // LR/RL: horizontal step from root to branch
+                var px = (direction==='RL') ? p._x : p._x + p._w;
+                var cx = (direction==='RL') ? ch._x + ch._w : ch._x;
+                var midX = (px + cx) / 2;
+                return 'M'+px+','+pcy+' L'+midX+','+pcy+' L'+midX+','+ccy+' L'+cx+','+ccy;
+            }
+        } else if (p.type === 'main' && (direction === 'LR' || direction === 'RL')) {
+            // LR/RL branch → child: vertical step (sub-columns are BELOW branch)
+            var py = p._y + p._h;
+            var cy = ch._y;
+            var midY = (py + cy) / 2;
+            return 'M'+pcx+','+py+' L'+pcx+','+midY+' L'+ccx+','+midY+' L'+ccx+','+cy;
+        } else {
+            // Non-root L-shape: vertical connector for all layouts
+            if (direction === 'BT') {
+                var spX = p._x + 8;
+                return 'M'+spX+','+p._y+' L'+spX+','+(ch._y+ch._h/2)+' L'+(ch._x-3)+','+(ch._y+ch._h/2);
+            } else if (direction === 'RL') {
+                // After RL flip, indent goes right-to-left; guide on right side
+                var spX = p._x + p._w - 8;
+                return 'M'+spX+','+(p._y+p._h)+' L'+spX+','+(ch._y+ch._h/2)+' L'+(ch._x+ch._w+3)+','+(ch._y+ch._h/2);
+            } else {
+                // TB and LR: guide on left side, going down then right
+                var spX = p._x + 8;
+                return 'M'+spX+','+(p._y+p._h)+' L'+spX+','+(ch._y+ch._h/2)+' L'+(ch._x-3)+','+(ch._y+ch._h/2);
+            }
+        }
     }
 
     // ═══════════════════════════════════════════
@@ -920,40 +1037,9 @@
     //  RENDER DIAGRAM
     // ═══════════════════════════════════════════
     async function renderDiagram() {
-        // TB/BT: use custom compact tree renderer (not Mermaid)
-        if (currentDirection === 'TB' || currentDirection === 'BT') {
-            loadingOverlay.classList.add('active');
-            setTimeout(function() { renderCompactTree(currentDirection); }, 50);
-            return;
-        }
-        reinitMermaid();
-        renderCount++;
-        var id = 'mermaid-svg-' + renderCount;
+        // All directions now use the custom compact tree renderer
         loadingOverlay.classList.add('active');
-
-        try {
-            var result = await mermaid.render(id, buildDefinition());
-            container.innerHTML = result.svg;
-            if (result.bindFunctions) result.bindFunctions(container);
-
-            afterRender();
-        } catch (err) {
-            console.error('Mermaid render error:', err);
-            // Fallback: try without frontmatter config
-            try {
-                renderCount++;
-                var fallbackId = 'mermaid-svg-' + renderCount;
-                var simpleDef = 'flowchart ' + currentDirection + '\n' + GRAPH_BODY;
-                var fallback = await mermaid.render(fallbackId, simpleDef);
-                container.innerHTML = fallback.svg;
-                if (fallback.bindFunctions) fallback.bindFunctions(container);
-                afterRender();
-            } catch (e2) {
-                console.error('Fallback render error:', e2);
-                container.innerHTML = '<p style="padding:2rem;color:#C41E3A;font-size:1.2rem;">Error al renderizar el diagrama. Revisa la consola.</p>';
-                loadingOverlay.classList.remove('active');
-            }
-        }
+        setTimeout(function() { renderCompactTree(currentDirection); }, 50);
     }
 
     function afterRender() {
@@ -1046,12 +1132,16 @@
         return { x: cx + dx * s, y: cy + dy * s };
     }
 
-    // Generate smooth bezier edge path based on flow direction
+    // Generate smooth bezier edge path - adaptive based on angle
     function generateEdgePath(ax, ay, bx, by) {
-        if (currentDirection === 'TB' || currentDirection === 'BT') {
+        var adx = Math.abs(bx - ax);
+        var ady = Math.abs(by - ay);
+        if (ady >= adx) {
+            // More vertical relationship
             var dy = (by - ay) * 0.5;
             return 'M' + ax + ',' + ay + ' C' + ax + ',' + (ay + dy) + ' ' + bx + ',' + (by - dy) + ' ' + bx + ',' + by;
         } else {
+            // More horizontal relationship
             var dx = (bx - ax) * 0.5;
             return 'M' + ax + ',' + ay + ' C' + (ax + dx) + ',' + ay + ' ' + (bx - dx) + ',' + by + ' ' + bx + ',' + by;
         }
@@ -1134,25 +1224,7 @@
     function updateSingleEdge(edge) {
         var sc = getNodeCenter(edge.sourceNode);
         var tc = getNodeCenter(edge.targetNode);
-
-        // TB/BT: L-shaped connectors for compact tree
-        if (currentDirection === 'TB' || currentDirection === 'BT') {
-            var isBT = (currentDirection === 'BT');
-            var isRoot = edge.sourceNode.getAttribute('data-root') === '1';
-            if (isRoot) {
-                var py = isBT ? (sc.y - sc.hh) : (sc.y + sc.hh);
-                var cy = isBT ? (tc.y + tc.hh) : (tc.y - tc.hh);
-                var midY = (py + cy) / 2;
-                edge.pathEl.setAttribute('d', 'M'+sc.x+','+py+' L'+sc.x+','+midY+' L'+tc.x+','+midY+' L'+tc.x+','+cy);
-            } else {
-                var spX = sc.x - sc.hw + 8;
-                var py = isBT ? (sc.y - sc.hh) : (sc.y + sc.hh);
-                edge.pathEl.setAttribute('d', 'M'+spX+','+py+' L'+spX+','+tc.y+' L'+(tc.x - tc.hw - 3)+','+tc.y);
-            }
-            return;
-        }
-
-        // LR/RL: Bezier curves
+        // Dynamic edge points: connect from nearest border point
         var sp = getEdgePoint(sc.x, sc.y, sc.hw, sc.hh, tc.x, tc.y);
         var tp = getEdgePoint(tc.x, tc.y, tc.hw, tc.hh, sc.x, sc.y);
         edge.pathEl.setAttribute('d', generateEdgePath(sp.x, sp.y, tp.x, tp.y));
