@@ -122,6 +122,99 @@
             opacity: 0.6;
         }
 
+        /* ── Control groups ── */
+        .ctrl-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .ctrl-label {
+            font-size: 0.62rem;
+            opacity: 0.65;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        /* ── Direction button group ── */
+        .btn-group {
+            display: inline-flex;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+        .btn-group button {
+            background: rgba(255,255,255,0.06);
+            border: none;
+            border-right: 1px solid rgba(255,255,255,0.12);
+            border-radius: 0;
+            color: rgba(255,255,255,0.65);
+            padding: 0.25rem 0.45rem;
+            cursor: pointer;
+            font-size: 0.65rem;
+            transition: all 0.15s;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .btn-group button:last-child { border-right: none; }
+        .btn-group button:hover {
+            background: rgba(255,255,255,0.18);
+            color: #fff;
+        }
+        .btn-group button.active {
+            background: rgba(212, 168, 67, 0.35);
+            color: #fff;
+            font-weight: 700;
+            text-shadow: 0 0 8px rgba(212, 168, 67, 0.4);
+        }
+
+        /* ── Toggle switches ── */
+        .toggle-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.8);
+            white-space: nowrap;
+        }
+        .toggle-label input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .toggle-track {
+            position: relative;
+            width: 28px;
+            height: 15px;
+            background: rgba(0,0,0,0.25);
+            border-radius: 8px;
+            transition: background 0.2s;
+            border: 1px solid rgba(255,255,255,0.15);
+            flex-shrink: 0;
+        }
+        .toggle-track::after {
+            content: '';
+            position: absolute;
+            top: 1.5px;
+            left: 2px;
+            width: 10px;
+            height: 10px;
+            background: rgba(255,255,255,0.55);
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        .toggle-label input:checked + .toggle-track {
+            background: rgba(212, 168, 67, 0.45);
+            border-color: #D4A843;
+        }
+        .toggle-label input:checked + .toggle-track::after {
+            transform: translateX(13px);
+            background: #D4A843;
+            box-shadow: 0 0 4px rgba(212, 168, 67, 0.5);
+        }
+
         /* ── Canvas area ── */
         .canvas-wrap {
             position: fixed;
@@ -134,6 +227,12 @@
             background-size: 20px 20px;
         }
         .canvas-wrap.dragging { cursor: grabbing; }
+        .canvas-wrap.view-locked { cursor: default; }
+        .canvas-wrap.node-dragging-active {
+            cursor: default;
+            user-select: none;
+            -webkit-user-select: none;
+        }
 
         #diagram-container {
             position: absolute;
@@ -143,6 +242,28 @@
         }
         #diagram-container.smooth-transition {
             transition: transform 0.3s ease;
+        }
+
+        /* ── Node drag visual feedback ── */
+        #diagram-container.drag-mode .node {
+            cursor: move !important;
+            pointer-events: all;
+        }
+        #diagram-container.drag-mode .node:hover > rect,
+        #diagram-container.drag-mode .node:hover > polygon,
+        #diagram-container.drag-mode .node:hover > circle,
+        #diagram-container.drag-mode .node:hover > path,
+        #diagram-container.drag-mode .node:hover .label-container {
+            filter: drop-shadow(0 0 5px rgba(212, 168, 67, 0.55));
+        }
+        #diagram-container .node.node-dragging {
+            opacity: 0.88;
+        }
+        #diagram-container .node.node-dragging > rect,
+        #diagram-container .node.node-dragging > polygon,
+        #diagram-container .node.node-dragging > path,
+        #diagram-container .node.node-dragging .label-container {
+            filter: drop-shadow(0 3px 8px rgba(0,0,0,0.3));
         }
 
         .mermaid svg { display: block; }
@@ -160,7 +281,7 @@
             font-size: 0.65rem;
             line-height: 1.5;
             backdrop-filter: blur(4px);
-            max-width: 260px;
+            max-width: 280px;
         }
         .info-overlay kbd {
             background: rgba(255,255,255,0.2);
@@ -168,6 +289,34 @@
             border-radius: 3px;
             font-family: monospace;
             font-size: 0.62rem;
+        }
+
+        /* ── Loading overlay ── */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            background: rgba(245, 245, 245, 0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding-top: 82px;
+            backdrop-filter: blur(2px);
+        }
+        .loading-overlay.active { display: flex; }
+        .loading-spinner {
+            background: #1a1a2e;
+            color: #D4A843;
+            padding: 0.7rem 1.4rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: pulse-load 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-load {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
         }
 
         /* ── Modal ── */
@@ -258,6 +407,23 @@
             transition: background 0.15s;
         }
         .modal-footer button:hover { background: #a01830; }
+
+        /* ── Status badge (direction indicator) ── */
+        .dir-badge {
+            position: fixed;
+            top: 86px;
+            right: 12px;
+            z-index: 90;
+            background: rgba(26,26,46,0.75);
+            color: #D4A843;
+            padding: 0.3rem 0.6rem;
+            border-radius: 5px;
+            font-size: 0.62rem;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
     </style>
 </head>
 <body>
@@ -273,8 +439,32 @@
 
 <!-- ══ Toolbar ══ -->
 <div class="toolbar">
-    <span class="title-area">Mapa del Sitio (interactivo)</span>
+    <span class="title-area">Mapa del Sitio</span>
     <div class="toolbar-controls">
+        <!-- Direction -->
+        <div class="ctrl-group">
+            <span class="ctrl-label">Dir:</span>
+            <div class="btn-group" id="dirBtnGroup">
+                <button onclick="setDirection('TB')" data-dir="TB" title="Arriba → Abajo">↓ TB</button>
+                <button onclick="setDirection('BT')" data-dir="BT" title="Abajo → Arriba">↑ BT</button>
+                <button onclick="setDirection('LR')" data-dir="LR" title="Izquierda → Derecha" class="active">→ LR</button>
+                <button onclick="setDirection('RL')" data-dir="RL" title="Derecha → Izquierda">← RL</button>
+            </div>
+        </div>
+        <span class="sep"></span>
+        <!-- Toggles -->
+        <label class="toggle-label" title="Bloquear pan y zoom del lienzo">
+            <input type="checkbox" id="fixedViewCheck" onchange="toggleFixedView()">
+            <span class="toggle-track"></span>
+            Fijar vista
+        </label>
+        <label class="toggle-label" title="Arrastrar nodos individuales">
+            <input type="checkbox" id="dragNodesCheck" onchange="toggleDragNodes()">
+            <span class="toggle-track"></span>
+            Mover nodos
+        </label>
+        <span class="sep"></span>
+        <!-- Zoom -->
         <button onclick="zoomIn()" title="Acercar">+ Zoom</button>
         <span class="zoom-display" id="zoomLevel">100%</span>
         <button onclick="zoomOut()" title="Alejar">- Zoom</button>
@@ -282,45 +472,17 @@
         <button onclick="centerView()" title="Centrar">Centrar</button>
         <span class="sep"></span>
         <button onclick="openModal()" title="Ver mapa en texto" style="background:rgba(212,168,67,0.3);border-color:#D4A843;">Ver en texto</button>
-        <span class="hint">Scroll = zoom | Arrastra = mover</span>
+        <span class="hint">Scroll = zoom · Arrastra = mover</span>
     </div>
 </div>
+
+<!-- ══ Direction badge ══ -->
+<div class="dir-badge" id="dirBadge">flowchart LR</div>
 
 <!-- ══ Canvas ══ -->
 <div class="canvas-wrap" id="canvasWrap">
     <div id="diagram-container">
-        <pre class="mermaid">
----
-config:
-  layout: fixed
-  theme: neo
-  look: classic
----
-flowchart LR
-    A["Mandarín a Español"] --> B["INICIO"] & C["BLOG"] & D["INMERSIÓN"] & E["HERRAMIENTAS"] & F["RECURSOS"] & G["TIENDA"] & H["SOBRE MÍ"]
-    B --> B1["Hero con Última Entrada"] & B2["Grid de Recursos Destacados"] & B3["Sección Mi Progreso HSK"] & B4["Newsletter Suscripción"]
-    C --> C1["Diario HSK, Niveles 1-6"] & C2["Fonética para Hispanohablantes"] & C3["Errores Comunes"] & C4["Cultura Lingüística"] & C5["Tags: Tonos, Caracteres, etc"]
-    D --> D1["Contenido Audiovisual"] & D2["Audio"] & D3["Lectura"] & D4["Redes Sociales Chinas"] & D5["Apps y Herramientas"]
-    D1 --> D1a["Programas de TV"] & D1b["Canales de YouTube"] & D1c["Anime en Chino"] & D1d["Series y Películas"] & D1e["Documentales"]
-    D2 --> D2a["Podcasts Mandarín"] & D2b["Música QQ y NetEase"] & D2c["Apps de Audio"]
-    D3 --> D3a["Manga Manhua"] & D3b["Libros Recomendados"] & D3c["Historias Cortas"] & D3d["Poemas Clásicos"] & D3e["Revistas Digitales"]
-    D4 --> D4a["RedNote XiaoHongShu"] & D4b["Weibo"] & D4c["Douyin"] & D4d["Bilibili"]
-    D5 --> D5a["Diccionarios Pleco"] & D5b["Flashcards Anki"] & D5c["Teclados Input Methods"]
-    E --> E1["HanziFlow App React"] & E2["Generador Hojas Trazos"]
-    E1 --> E1a["Demo Gratuita"] & E1b["Versión Completa"]
-    F --> F1["Mazos Anki Chino-Español"] & F2["Guías PDF"] & F3["Lista HSK Traducida"] & F4["Tabla de Tonos"]
-    G --> G1["Productos Digitales"] & G2["Suscripción Premium"] & G3["HanziFlow Pro"]
-    H --> H1["Mi Historia con el Chino"] & H2["Progreso Actual"] & H3["Formulario de Contacto"]
-
-    style A fill:#C41E3A,stroke:#8B1528,color:#fff
-    style B fill:#D4A843,stroke:#B38A2D,color:#1a1a2e
-    style C fill:#D4A843,stroke:#B38A2D,color:#1a1a2e
-    style D fill:#D4A843,stroke:#B38A2D,color:#1a1a2e
-    style E fill:#D4A843,stroke:#B38A2D,color:#1a1a2e
-    style F fill:#D4A843,stroke:#B38A2D,color:#1a1a2e
-    style G fill:#D4A843,stroke:#B38A2D,color:#1a1a2e
-    style H fill:#D4A843,stroke:#B38A2D,color:#1a1a2e
-        </pre>
+        <!-- SVG rendered programmatically by Mermaid -->
     </div>
 </div>
 
@@ -331,7 +493,15 @@ flowchart LR
     <kbd>+</kbd> / <kbd>-</kbd> Zoom &nbsp;
     <kbd>0</kbd> Ajustar &nbsp;
     <kbd>C</kbd> Centrar &nbsp;
-    <kbd>T</kbd> Ver texto
+    <kbd>T</kbd> Ver texto<br>
+    <kbd>L</kbd> Fijar vista &nbsp;
+    <kbd>D</kbd> Mover nodos &nbsp;
+    <kbd>1-4</kbd> Dirección
+</div>
+
+<!-- ══ Loading overlay ══ -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">Renderizando diagrama…</div>
 </div>
 
 <!-- ══ Modal: Mapa en texto ══ -->
@@ -423,42 +593,602 @@ flowchart LR
 
 <script>
 (function() {
-    // ── State ──
-    let scale = 1;
-    let translateX = 0;
-    let translateY = 0;
-    let isDragging = false;
-    let dragStartX = 0;
-    let dragStartY = 0;
-    let lastTranslateX = 0;
-    let lastTranslateY = 0;
+    // ═══════════════════════════════════════════
+    //  STATE
+    // ═══════════════════════════════════════════
+    var scale = 1;
+    var translateX = 0;
+    var translateY = 0;
+    var isDragging = false;
+    var dragStartX = 0;
+    var dragStartY = 0;
+    var lastTranslateX = 0;
+    var lastTranslateY = 0;
 
-    const MIN_SCALE = 0.15;
-    const MAX_SCALE = 4;
-    const ZOOM_STEP = 0.15;
+    var currentDirection = 'LR';
+    var isViewLocked = false;
+    var isDragNodesEnabled = false;
 
-    const container = document.getElementById('diagram-container');
-    const canvasWrap = document.getElementById('canvasWrap');
-    const zoomDisplay = document.getElementById('zoomLevel');
+    // Node drag state
+    var currentDragNode = null;
+    var nodeOrigX = 0;
+    var nodeOrigY = 0;
+    var nodeDragStartScreenX = 0;
+    var nodeDragStartScreenY = 0;
 
-    // ── Init Mermaid ──
-    mermaid.initialize({
-        startOnLoad: true,
-        theme: 'neo',
-        securityLevel: 'loose',
-        flowchart: {
+    // Edge tracking for node drag
+    var edgeMap = [];
+
+    var MIN_SCALE = 0.15;
+    var MAX_SCALE = 10;
+    var ZOOM_STEP = 0.15;
+    var renderCount = 0;
+
+    // ═══════════════════════════════════════════
+    //  DOM REFS
+    // ═══════════════════════════════════════════
+    var container = document.getElementById('diagram-container');
+    var canvasWrap = document.getElementById('canvasWrap');
+    var zoomDisplay = document.getElementById('zoomLevel');
+    var loadingOverlay = document.getElementById('loadingOverlay');
+    var dirBadge = document.getElementById('dirBadge');
+
+    // ═══════════════════════════════════════════
+    //  MERMAID GRAPH BODY (sin config ni dirección)
+    // ═══════════════════════════════════════════
+    var GRAPH_BODY = [
+        '    A["Mandarín a Español"] --> B["INICIO"] & C["BLOG"] & D["INMERSIÓN"] & E["HERRAMIENTAS"] & F["RECURSOS"] & G["TIENDA"] & H["SOBRE MÍ"]',
+        '    B --> B1["Hero con Última Entrada"] & B2["Grid de Recursos Destacados"] & B3["Sección Mi Progreso HSK"] & B4["Newsletter Suscripción"]',
+        '    C --> C1["Diario HSK, Niveles 1-6"] & C2["Fonética para Hispanohablantes"] & C3["Errores Comunes"] & C4["Cultura Lingüística"] & C5["Tags: Tonos, Caracteres, etc"]',
+        '    D --> D1["Contenido Audiovisual"] & D2["Audio"] & D3["Lectura"] & D4["Redes Sociales Chinas"] & D5["Apps y Herramientas"]',
+        '    D1 --> D1a["Programas de TV"] & D1b["Canales de YouTube"] & D1c["Anime en Chino"] & D1d["Series y Películas"] & D1e["Documentales"]',
+        '    D2 --> D2a["Podcasts Mandarín"] & D2b["Música QQ y NetEase"] & D2c["Apps de Audio"]',
+        '    D3 --> D3a["Manga Manhua"] & D3b["Libros Recomendados"] & D3c["Historias Cortas"] & D3d["Poemas Clásicos"] & D3e["Revistas Digitales"]',
+        '    D4 --> D4a["RedNote XiaoHongShu"] & D4b["Weibo"] & D4c["Douyin"] & D4d["Bilibili"]',
+        '    D5 --> D5a["Diccionarios Pleco"] & D5b["Flashcards Anki"] & D5c["Teclados Input Methods"]',
+        '    E --> E1["HanziFlow App React"] & E2["Generador Hojas Trazos"]',
+        '    E1 --> E1a["Demo Gratuita"] & E1b["Versión Completa"]',
+        '    F --> F1["Mazos Anki Chino-Español"] & F2["Guías PDF"] & F3["Lista HSK Traducida"] & F4["Tabla de Tonos"]',
+        '    G --> G1["Productos Digitales"] & G2["Suscripción Premium"] & G3["HanziFlow Pro"]',
+        '    H --> H1["Mi Historia con el Chino"] & H2["Progreso Actual"] & H3["Formulario de Contacto"]',
+        '',
+        '    style A fill:#C41E3A,stroke:#8B1528,color:#fff',
+        '    style B fill:#D4A843,stroke:#B38A2D,color:#1a1a2e',
+        '    style C fill:#D4A843,stroke:#B38A2D,color:#1a1a2e',
+        '    style D fill:#D4A843,stroke:#B38A2D,color:#1a1a2e',
+        '    style E fill:#D4A843,stroke:#B38A2D,color:#1a1a2e',
+        '    style F fill:#D4A843,stroke:#B38A2D,color:#1a1a2e',
+        '    style G fill:#D4A843,stroke:#B38A2D,color:#1a1a2e',
+        '    style H fill:#D4A843,stroke:#B38A2D,color:#1a1a2e'
+    ].join('\n');
+
+    // ═══════════════════════════════════════════
+    //  TREE DATA (for compact TB/BT custom render)
+    // ═══════════════════════════════════════════
+    var TREE_DATA = {
+        id:'A', label:'Mandarín a Español', type:'root', children:[
+            {id:'B', label:'INICIO', type:'main', children:[
+                {id:'B1', label:'Hero con Última Entrada'},
+                {id:'B2', label:'Grid de Recursos Destacados'},
+                {id:'B3', label:'Sección Mi Progreso HSK'},
+                {id:'B4', label:'Newsletter Suscripción'}
+            ]},
+            {id:'C', label:'BLOG', type:'main', children:[
+                {id:'C1', label:'Diario HSK, Niveles 1-6'},
+                {id:'C2', label:'Fonética para Hispanohablantes'},
+                {id:'C3', label:'Errores Comunes'},
+                {id:'C4', label:'Cultura Lingüística'},
+                {id:'C5', label:'Tags: Tonos, Caracteres, etc'}
+            ]},
+            {id:'D', label:'INMERSIÓN', type:'main', children:[
+                {id:'D1', label:'Contenido Audiovisual', children:[
+                    {id:'D1a', label:'Programas de TV'},
+                    {id:'D1b', label:'Canales de YouTube'},
+                    {id:'D1c', label:'Anime en Chino'},
+                    {id:'D1d', label:'Series y Películas'},
+                    {id:'D1e', label:'Documentales'}
+                ]},
+                {id:'D2', label:'Audio', children:[
+                    {id:'D2a', label:'Podcasts Mandarín'},
+                    {id:'D2b', label:'Música QQ y NetEase'},
+                    {id:'D2c', label:'Apps de Audio'}
+                ]},
+                {id:'D3', label:'Lectura', children:[
+                    {id:'D3a', label:'Manga Manhua'},
+                    {id:'D3b', label:'Libros Recomendados'},
+                    {id:'D3c', label:'Historias Cortas'},
+                    {id:'D3d', label:'Poemas Clásicos'},
+                    {id:'D3e', label:'Revistas Digitales'}
+                ]},
+                {id:'D4', label:'Redes Sociales Chinas', children:[
+                    {id:'D4a', label:'RedNote XiaoHongShu'},
+                    {id:'D4b', label:'Weibo'},
+                    {id:'D4c', label:'Douyin'},
+                    {id:'D4d', label:'Bilibili'}
+                ]},
+                {id:'D5', label:'Apps y Herramientas', children:[
+                    {id:'D5a', label:'Diccionarios Pleco'},
+                    {id:'D5b', label:'Flashcards Anki'},
+                    {id:'D5c', label:'Teclados Input Methods'}
+                ]}
+            ]},
+            {id:'E', label:'HERRAMIENTAS', type:'main', children:[
+                {id:'E1', label:'HanziFlow App React', children:[
+                    {id:'E1a', label:'Demo Gratuita'},
+                    {id:'E1b', label:'Versión Completa'}
+                ]},
+                {id:'E2', label:'Generador Hojas Trazos'}
+            ]},
+            {id:'F', label:'RECURSOS', type:'main', children:[
+                {id:'F1', label:'Mazos Anki Chino-Español'},
+                {id:'F2', label:'Guías PDF'},
+                {id:'F3', label:'Lista HSK Traducida'},
+                {id:'F4', label:'Tabla de Tonos'}
+            ]},
+            {id:'G', label:'TIENDA', type:'main', children:[
+                {id:'G1', label:'Productos Digitales'},
+                {id:'G2', label:'Suscripción Premium'},
+                {id:'G3', label:'HanziFlow Pro'}
+            ]},
+            {id:'H', label:'SOBRE MÍ', type:'main', children:[
+                {id:'H1', label:'Mi Historia con el Chino'},
+                {id:'H2', label:'Progreso Actual'},
+                {id:'H3', label:'Formulario de Contacto'}
+            ]}
+        ]
+    };
+
+    // ── Compact tree helpers ──
+    var _mCtx = null;
+    function measureLabel(text) {
+        if (!_mCtx) {
+            _mCtx = document.createElement('canvas').getContext('2d');
+            _mCtx.font = '11px "Segoe UI", system-ui, sans-serif';
+        }
+        return _mCtx.measureText(text).width;
+    }
+    function escapeHtml(t) {
+        return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function flattenTree(node, depth, list) {
+        list.push({ node: node, depth: depth });
+        if (node.children) {
+            for (var i = 0; i < node.children.length; i++)
+                flattenTree(node.children[i], depth + 1, list);
+        }
+    }
+    function subtreeMaxWidth(node, depth, pad, indent) {
+        var w = measureLabel(node.label) + pad * 2 + depth * indent;
+        if (node.children) {
+            for (var i = 0; i < node.children.length; i++)
+                w = Math.max(w, subtreeMaxWidth(node.children[i], depth + 1, pad, indent));
+        }
+        return w;
+    }
+
+    // ═══════════════════════════════════════════
+    //  COMPACT TREE RENDERER (TB / BT)
+    // ═══════════════════════════════════════════
+    function renderCompactTree(direction) {
+        var NODE_H = 32, PAD = 16, VGAP = 6, COL_GAP = 22, INDENT = 18, ROOT_GAP = 55;
+        var isBT = (direction === 'BT');
+
+        // Deep clone tree
+        var root = JSON.parse(JSON.stringify(TREE_DATA));
+        var cols = root.children;
+
+        // Column widths based on widest label in each subtree
+        var colWidths = [];
+        for (var c = 0; c < cols.length; c++) {
+            colWidths.push(Math.max(130, subtreeMaxWidth(cols[c], 0, PAD, INDENT)));
+        }
+
+        // Layout each column vertically
+        var x = 0, maxBottom = 0;
+        for (var c = 0; c < cols.length; c++) {
+            var items = [];
+            flattenTree(cols[c], 0, items);
+            var colW = colWidths[c];
+            var y = ROOT_GAP + NODE_H;
+            for (var i = 0; i < items.length; i++) {
+                var indent = items[i].depth * INDENT;
+                items[i].node._x = x + indent;
+                items[i].node._y = y;
+                items[i].node._w = colW - indent;
+                items[i].node._h = NODE_H;
+                y += NODE_H + VGAP;
+            }
+            maxBottom = Math.max(maxBottom, y);
+            x += colW + COL_GAP;
+        }
+        var totalW = x - COL_GAP;
+        var totalH = maxBottom + 20;
+
+        // Position root centered
+        var rootW = Math.max(200, measureLabel(root.label) + PAD * 2);
+        root._x = (totalW - rootW) / 2;
+        root._y = 0;
+        root._w = rootW;
+        root._h = NODE_H;
+
+        // Collect all nodes & edges
+        var allNodes = [], allEdges = [];
+        function collect(nd) {
+            allNodes.push(nd);
+            if (nd.children) {
+                for (var i = 0; i < nd.children.length; i++) {
+                    allEdges.push({ parent: nd, child: nd.children[i] });
+                    collect(nd.children[i]);
+                }
+            }
+        }
+        collect(root);
+
+        // BT: flip all Y coordinates
+        if (isBT) {
+            for (var n = 0; n < allNodes.length; n++)
+                allNodes[n]._y = totalH - allNodes[n]._y - allNodes[n]._h;
+        }
+
+        // ── Build SVG ──
+        var svgW = totalW + 80, svgH = totalH + 80;
+        var s = [];
+        s.push('<svg xmlns="http://www.w3.org/2000/svg" width="'+svgW+'" height="'+svgH+'" viewBox="0 0 '+svgW+' '+svgH+'">');
+        s.push('<g transform="translate(40,40)">');
+
+        // Edges
+        s.push('<g class="edgePaths">');
+        for (var e = 0; e < allEdges.length; e++) {
+            var p = allEdges[e].parent, ch = allEdges[e].child;
+            var pcx = p._x + p._w/2, ccx = ch._x + ch._w/2;
+            var d;
+            if (p.type === 'root') {
+                var py = isBT ? p._y : p._y + p._h;
+                var cy = isBT ? ch._y + ch._h : ch._y;
+                var midY = (py + cy) / 2;
+                d = 'M'+pcx+','+py+' L'+pcx+','+midY+' L'+ccx+','+midY+' L'+ccx+','+cy;
+            } else {
+                var spX = p._x + 8;
+                var py = isBT ? p._y : p._y + p._h;
+                var chCy = ch._y + ch._h/2;
+                var chL = ch._x - 3;
+                d = 'M'+spX+','+py+' L'+spX+','+chCy+' L'+chL+','+chCy;
+            }
+            s.push('<g class="edgePath"><path fill="none" stroke="#aaa" stroke-width="1.2" d="'+d+'"/></g>');
+        }
+        s.push('</g>');
+
+        // Nodes
+        s.push('<g class="nodes">');
+        for (var n = 0; n < allNodes.length; n++) {
+            var nd = allNodes[n];
+            var fill, stroke, tf, fw;
+            if (nd.type==='root')      { fill='#C41E3A'; stroke='#8B1528'; tf='#fff';    fw='700'; }
+            else if (nd.type==='main') { fill='#D4A843'; stroke='#B38A2D'; tf='#1a1a2e'; fw='600'; }
+            else                       { fill='#fff';    stroke='#ccc';    tf='#1a1a2e'; fw='400'; }
+
+            var cx = nd._x + nd._w/2, cy = nd._y + nd._h/2;
+            var dr = nd.type==='root' ? ' data-root="1"' : '';
+            s.push('<g class="node" id="ct-'+nd.id+'"'+dr+' transform="translate('+cx+','+cy+')">');
+            s.push('<rect x="'+(-nd._w/2)+'" y="'+(-nd._h/2)+'" width="'+nd._w+'" height="'+nd._h+'" rx="6" ry="6" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.5"/>');
+            s.push('<text fill="'+tf+'" font-family="\'Segoe UI\',system-ui,sans-serif" font-size="11" font-weight="'+fw+'" text-anchor="middle" dominant-baseline="central">'+escapeHtml(nd.label)+'</text>');
+            s.push('</g>');
+        }
+        s.push('</g>');
+        s.push('</g></svg>');
+
+        // Insert & setup
+        container.innerHTML = s.join('\n');
+        updateDragMode();
+        ensureEdgesBehindNodes();
+        loadingOverlay.classList.remove('active');
+        dirBadge.textContent = 'flowchart ' + currentDirection;
+        setTimeout(function() { buildEdgeMap(); resetView(); }, 150);
+    }
+
+    // ═══════════════════════════════════════════
+    //  BUILD MERMAID DEFINITION
+    // ═══════════════════════════════════════════
+    function buildDefinition() {
+        return '---\nconfig:\n  theme: neo\n  look: classic\n---\nflowchart ' + currentDirection + '\n' + GRAPH_BODY;
+    }
+
+    // ═══════════════════════════════════════════
+    //  INIT / RE-INIT MERMAID (per direction)
+    // ═══════════════════════════════════════════
+    function reinitMermaid() {
+        var flowConfig = {
             curve: 'basis',
             padding: 15,
-            htmlLabels: true,
-            defaultRenderer: 'elk'
-        }
-    });
+            htmlLabels: true
+        };
 
-    // ── Render update ──
+        // ELK only for LR/RL - dagre handles TB/BT wide trees
+        // much better and produces readable node sizes
+        if (currentDirection === 'LR' || currentDirection === 'RL') {
+            flowConfig.defaultRenderer = 'elk';
+        }
+
+        mermaid.initialize({
+            startOnLoad: false,
+            securityLevel: 'loose',
+            flowchart: flowConfig
+        });
+    }
+
+    // ═══════════════════════════════════════════
+    //  RENDER DIAGRAM
+    // ═══════════════════════════════════════════
+    async function renderDiagram() {
+        // TB/BT: use custom compact tree renderer (not Mermaid)
+        if (currentDirection === 'TB' || currentDirection === 'BT') {
+            loadingOverlay.classList.add('active');
+            setTimeout(function() { renderCompactTree(currentDirection); }, 50);
+            return;
+        }
+        reinitMermaid();
+        renderCount++;
+        var id = 'mermaid-svg-' + renderCount;
+        loadingOverlay.classList.add('active');
+
+        try {
+            var result = await mermaid.render(id, buildDefinition());
+            container.innerHTML = result.svg;
+            if (result.bindFunctions) result.bindFunctions(container);
+
+            afterRender();
+        } catch (err) {
+            console.error('Mermaid render error:', err);
+            // Fallback: try without frontmatter config
+            try {
+                renderCount++;
+                var fallbackId = 'mermaid-svg-' + renderCount;
+                var simpleDef = 'flowchart ' + currentDirection + '\n' + GRAPH_BODY;
+                var fallback = await mermaid.render(fallbackId, simpleDef);
+                container.innerHTML = fallback.svg;
+                if (fallback.bindFunctions) fallback.bindFunctions(container);
+                afterRender();
+            } catch (e2) {
+                console.error('Fallback render error:', e2);
+                container.innerHTML = '<p style="padding:2rem;color:#C41E3A;font-size:1.2rem;">Error al renderizar el diagrama. Revisa la consola.</p>';
+                loadingOverlay.classList.remove('active');
+            }
+        }
+    }
+
+    function afterRender() {
+        updateDragMode();
+        ensureEdgesBehindNodes();
+        loadingOverlay.classList.remove('active');
+        dirBadge.textContent = 'flowchart ' + currentDirection;
+
+        // Build edge map after SVG layout settles
+        setTimeout(function() {
+            buildEdgeMap();
+            resetView();
+        }, 300);
+    }
+
+    // ═══════════════════════════════════════════
+    //  DIRECTION CONTROL
+    // ═══════════════════════════════════════════
+    window.setDirection = function(dir) {
+        if (dir === currentDirection) return;
+        currentDirection = dir;
+        var btns = document.querySelectorAll('#dirBtnGroup button');
+        for (var i = 0; i < btns.length; i++) {
+            btns[i].classList.toggle('active', btns[i].getAttribute('data-dir') === dir);
+        }
+        renderDiagram();
+    };
+
+    // ═══════════════════════════════════════════
+    //  TOGGLE: FIXED VIEW
+    // ═══════════════════════════════════════════
+    window.toggleFixedView = function() {
+        isViewLocked = document.getElementById('fixedViewCheck').checked;
+        canvasWrap.classList.toggle('view-locked', isViewLocked);
+    };
+
+    // ═══════════════════════════════════════════
+    //  TOGGLE: DRAG NODES
+    // ═══════════════════════════════════════════
+    window.toggleDragNodes = function() {
+        isDragNodesEnabled = document.getElementById('dragNodesCheck').checked;
+        updateDragMode();
+    };
+
+    function updateDragMode() {
+        container.classList.toggle('drag-mode', isDragNodesEnabled);
+    }
+
+    // ═══════════════════════════════════════════
+    //  NODE TRANSFORM HELPERS
+    // ═══════════════════════════════════════════
+    function getNodeTranslate(node) {
+        var t = node.getAttribute('transform') || '';
+        var m = t.match(/translate\(\s*([\d.eE+-]+)[\s,]+([\d.eE+-]+)/);
+        return m ? { x: parseFloat(m[1]), y: parseFloat(m[2]) } : { x: 0, y: 0 };
+    }
+
+    // ═══════════════════════════════════════════
+    //  EDGE TRACKING SYSTEM
+    //  Keeps edges connected to nodes when dragged
+    // ═══════════════════════════════════════════
+
+    function getNodeCenter(node) {
+        var t = getNodeTranslate(node);
+        var bb = node.getBBox();
+        return {
+            x: t.x + bb.x + bb.width / 2,
+            y: t.y + bb.y + bb.height / 2,
+            hw: bb.width / 2,
+            hh: bb.height / 2
+        };
+    }
+
+    // Finds the point on the rectangular border closest to target
+    function getEdgePoint(cx, cy, hw, hh, tx, ty) {
+        var dx = tx - cx;
+        var dy = ty - cy;
+        if (dx === 0 && dy === 0) return { x: cx, y: cy };
+
+        var absDx = Math.abs(dx);
+        var absDy = Math.abs(dy);
+        var margin = 5;
+        var s;
+
+        if (absDx / (hw + margin) > absDy / (hh + margin)) {
+            s = (hw + margin) / absDx;
+        } else {
+            s = (hh + margin) / absDy;
+        }
+        return { x: cx + dx * s, y: cy + dy * s };
+    }
+
+    // Generate smooth bezier edge path based on flow direction
+    function generateEdgePath(ax, ay, bx, by) {
+        if (currentDirection === 'TB' || currentDirection === 'BT') {
+            var dy = (by - ay) * 0.5;
+            return 'M' + ax + ',' + ay + ' C' + ax + ',' + (ay + dy) + ' ' + bx + ',' + (by - dy) + ' ' + bx + ',' + by;
+        } else {
+            var dx = (bx - ax) * 0.5;
+            return 'M' + ax + ',' + ay + ' C' + (ax + dx) + ',' + ay + ' ' + (bx - dx) + ',' + by + ' ' + bx + ',' + by;
+        }
+    }
+
+    // Build the edge map: associates each edge path with source & target nodes
+    function buildEdgeMap() {
+        edgeMap = [];
+        var svg = container.querySelector('svg');
+        if (!svg) return;
+
+        var nodes = svg.querySelectorAll('.node');
+        if (!nodes.length) return;
+
+        // Collect node centers
+        var nodeCenters = [];
+        for (var i = 0; i < nodes.length; i++) {
+            var nc = getNodeCenter(nodes[i]);
+            nc.node = nodes[i];
+            nodeCenters.push(nc);
+        }
+
+        // Find edge paths - try standard selector then fallback
+        var pathEls = svg.querySelectorAll('.edgePath path');
+        if (!pathEls.length) {
+            var allPaths = svg.querySelectorAll('path');
+            var filtered = [];
+            for (var p = 0; p < allPaths.length; p++) {
+                var pp = allPaths[p];
+                if (!pp.closest('.node') && !pp.closest('marker') && !pp.closest('defs')) {
+                    filtered.push(pp);
+                }
+            }
+            pathEls = filtered;
+        }
+
+        // Map each edge to closest source and target nodes
+        for (var e = 0; e < pathEls.length; e++) {
+            var pathEl = pathEls[e];
+            var totalLen;
+            try {
+                totalLen = pathEl.getTotalLength();
+                if (totalLen < 1) continue;
+            } catch (err) { continue; }
+
+            var startPt = pathEl.getPointAtLength(0);
+            var endPt = pathEl.getPointAtLength(totalLen);
+
+            var closestStart = null, minSD = Infinity;
+            var closestEnd = null, minED = Infinity;
+
+            for (var n = 0; n < nodeCenters.length; n++) {
+                var nc = nodeCenters[n];
+                var ds = Math.hypot(startPt.x - nc.x, startPt.y - nc.y);
+                var de = Math.hypot(endPt.x - nc.x, endPt.y - nc.y);
+                if (ds < minSD) { minSD = ds; closestStart = nc; }
+                if (de < minED) { minED = de; closestEnd = nc; }
+            }
+
+            if (closestStart && closestEnd && closestStart.node !== closestEnd.node) {
+                edgeMap.push({
+                    pathEl: pathEl,
+                    sourceNode: closestStart.node,
+                    targetNode: closestEnd.node
+                });
+            }
+        }
+    }
+
+    // Update all edges connected to a moved node
+    function updateEdgesForNode(node) {
+        for (var i = 0; i < edgeMap.length; i++) {
+            var edge = edgeMap[i];
+            if (edge.sourceNode === node || edge.targetNode === node) {
+                updateSingleEdge(edge);
+            }
+        }
+    }
+
+    function updateSingleEdge(edge) {
+        var sc = getNodeCenter(edge.sourceNode);
+        var tc = getNodeCenter(edge.targetNode);
+
+        // TB/BT: L-shaped connectors for compact tree
+        if (currentDirection === 'TB' || currentDirection === 'BT') {
+            var isBT = (currentDirection === 'BT');
+            var isRoot = edge.sourceNode.getAttribute('data-root') === '1';
+            if (isRoot) {
+                var py = isBT ? (sc.y - sc.hh) : (sc.y + sc.hh);
+                var cy = isBT ? (tc.y + tc.hh) : (tc.y - tc.hh);
+                var midY = (py + cy) / 2;
+                edge.pathEl.setAttribute('d', 'M'+sc.x+','+py+' L'+sc.x+','+midY+' L'+tc.x+','+midY+' L'+tc.x+','+cy);
+            } else {
+                var spX = sc.x - sc.hw + 8;
+                var py = isBT ? (sc.y - sc.hh) : (sc.y + sc.hh);
+                edge.pathEl.setAttribute('d', 'M'+spX+','+py+' L'+spX+','+tc.y+' L'+(tc.x - tc.hw - 3)+','+tc.y);
+            }
+            return;
+        }
+
+        // LR/RL: Bezier curves
+        var sp = getEdgePoint(sc.x, sc.y, sc.hw, sc.hh, tc.x, tc.y);
+        var tp = getEdgePoint(tc.x, tc.y, tc.hw, tc.hh, sc.x, sc.y);
+        edge.pathEl.setAttribute('d', generateEdgePath(sp.x, sp.y, tp.x, tp.y));
+    }
+
+    // Ensure edge groups render BEHIND node groups in SVG z-order
+    function ensureEdgesBehindNodes() {
+        try {
+            var svg = container.querySelector('svg');
+            if (!svg) return;
+
+            var edgePaths = svg.querySelector('.edgePaths');
+            var edgeLabels = svg.querySelector('.edgeLabels');
+            var nodesGroup = svg.querySelector('.nodes');
+
+            // Only reorder if all exist AND share the same parent
+            if (nodesGroup && edgePaths && edgePaths.parentNode === nodesGroup.parentNode) {
+                var parent = nodesGroup.parentNode;
+                parent.insertBefore(edgePaths, nodesGroup);
+                if (edgeLabels && edgeLabels.parentNode === parent) {
+                    parent.insertBefore(edgeLabels, nodesGroup);
+                }
+            }
+        } catch (e) {
+            // Non-critical: edges may just render in default order
+            console.warn('ensureEdgesBehindNodes skipped:', e.message);
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    //  CANVAS TRANSFORM
+    // ═══════════════════════════════════════════
     function applyTransform(smooth) {
         if (smooth) {
             container.classList.add('smooth-transition');
-            setTimeout(() => container.classList.remove('smooth-transition'), 320);
+            setTimeout(function() { container.classList.remove('smooth-transition'); }, 320);
         } else {
             container.classList.remove('smooth-transition');
         }
@@ -467,29 +1197,62 @@ flowchart LR
         zoomDisplay.textContent = Math.round(scale * 100) + '%';
     }
 
-    // ── Zoom at point ──
+    // ═══════════════════════════════════════════
+    //  ZOOM AT POINT
+    // ═══════════════════════════════════════════
     function zoomAtPoint(newScale, cx, cy) {
+        if (isViewLocked) return;
         newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
-        const ratio = newScale / scale;
+        var ratio = newScale / scale;
         translateX = cx - ratio * (cx - translateX);
         translateY = cy - ratio * (cy - translateY);
         scale = newScale;
         applyTransform(false);
     }
 
-    // ── Mouse wheel zoom ──
+    // ═══════════════════════════════════════════
+    //  MOUSE WHEEL ZOOM
+    // ═══════════════════════════════════════════
     canvasWrap.addEventListener('wheel', function(e) {
+        if (isViewLocked) return;
         e.preventDefault();
-        const rect = canvasWrap.getBoundingClientRect();
-        const cx = e.clientX - rect.left;
-        const cy = e.clientY - rect.top;
-        const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+        var rect = canvasWrap.getBoundingClientRect();
+        var cx = e.clientX - rect.left;
+        var cy = e.clientY - rect.top;
+        var delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
         zoomAtPoint(scale + delta, cx, cy);
     }, { passive: false });
 
-    // ── Pan (drag) ──
+    // ═══════════════════════════════════════════
+    //  PAN (DRAG) + NODE DRAG
+    // ═══════════════════════════════════════════
     canvasWrap.addEventListener('mousedown', function(e) {
         if (e.button !== 0) return;
+
+        // ── Node drag takes priority ──
+        if (isDragNodesEnabled) {
+            var node = e.target.closest('.node');
+            if (node) {
+                e.stopPropagation();
+                currentDragNode = node;
+                node.classList.add('node-dragging');
+                canvasWrap.classList.add('node-dragging-active');
+
+                var pos = getNodeTranslate(node);
+                nodeOrigX = pos.x;
+                nodeOrigY = pos.y;
+                nodeDragStartScreenX = e.clientX;
+                nodeDragStartScreenY = e.clientY;
+
+                // Bring node to front within its SVG group
+                if (node.parentElement) node.parentElement.appendChild(node);
+                return;
+            }
+        }
+
+        // ── Canvas pan ──
+        if (isViewLocked) return;
+
         isDragging = true;
         dragStartX = e.clientX;
         dragStartY = e.clientY;
@@ -497,66 +1260,133 @@ flowchart LR
         lastTranslateY = translateY;
         canvasWrap.classList.add('dragging');
     });
+
     window.addEventListener('mousemove', function(e) {
+        // ── Node drag with edge tracking ──
+        if (currentDragNode) {
+            var dx = (e.clientX - nodeDragStartScreenX) / scale;
+            var dy = (e.clientY - nodeDragStartScreenY) / scale;
+            currentDragNode.setAttribute('transform',
+                'translate(' + (nodeOrigX + dx) + ', ' + (nodeOrigY + dy) + ')');
+            updateEdgesForNode(currentDragNode);
+            return;
+        }
+        // ── Canvas pan ──
         if (!isDragging) return;
         translateX = lastTranslateX + (e.clientX - dragStartX);
         translateY = lastTranslateY + (e.clientY - dragStartY);
         applyTransform(false);
     });
+
     window.addEventListener('mouseup', function() {
+        if (currentDragNode) {
+            currentDragNode.classList.remove('node-dragging');
+            canvasWrap.classList.remove('node-dragging-active');
+            currentDragNode = null;
+        }
         isDragging = false;
         canvasWrap.classList.remove('dragging');
     });
 
-    // ── Touch support ──
-    let lastTouchDist = 0;
+    // ═══════════════════════════════════════════
+    //  TOUCH SUPPORT
+    // ═══════════════════════════════════════════
+    var lastTouchDist = 0;
+
     canvasWrap.addEventListener('touchstart', function(e) {
         if (e.touches.length === 1) {
+            // Check node drag
+            if (isDragNodesEnabled) {
+                var node = e.target.closest('.node');
+                if (node) {
+                    e.preventDefault();
+                    currentDragNode = node;
+                    node.classList.add('node-dragging');
+                    canvasWrap.classList.add('node-dragging-active');
+
+                    var pos = getNodeTranslate(node);
+                    nodeOrigX = pos.x;
+                    nodeOrigY = pos.y;
+                    nodeDragStartScreenX = e.touches[0].clientX;
+                    nodeDragStartScreenY = e.touches[0].clientY;
+
+                    if (node.parentElement) node.parentElement.appendChild(node);
+                    return;
+                }
+            }
+
+            if (isViewLocked) return;
+
             isDragging = true;
             dragStartX = e.touches[0].clientX;
             dragStartY = e.touches[0].clientY;
             lastTranslateX = translateX;
             lastTranslateY = translateY;
-        } else if (e.touches.length === 2) {
+        } else if (e.touches.length === 2 && !isViewLocked) {
             isDragging = false;
-            const dx = e.touches[0].clientX - e.touches[1].clientX;
-            const dy = e.touches[0].clientY - e.touches[1].clientY;
-            lastTouchDist = Math.sqrt(dx*dx + dy*dy);
+            var dx2 = e.touches[0].clientX - e.touches[1].clientX;
+            var dy2 = e.touches[0].clientY - e.touches[1].clientY;
+            lastTouchDist = Math.sqrt(dx2 * dx2 + dy2 * dy2);
         }
-    }, { passive: true });
+    }, { passive: false });
+
     canvasWrap.addEventListener('touchmove', function(e) {
         e.preventDefault();
+
+        // Node drag with edge tracking
+        if (currentDragNode && e.touches.length === 1) {
+            var dx = (e.touches[0].clientX - nodeDragStartScreenX) / scale;
+            var dy = (e.touches[0].clientY - nodeDragStartScreenY) / scale;
+            currentDragNode.setAttribute('transform',
+                'translate(' + (nodeOrigX + dx) + ', ' + (nodeOrigY + dy) + ')');
+            updateEdgesForNode(currentDragNode);
+            return;
+        }
+
         if (e.touches.length === 1 && isDragging) {
             translateX = lastTranslateX + (e.touches[0].clientX - dragStartX);
             translateY = lastTranslateY + (e.touches[0].clientY - dragStartY);
             applyTransform(false);
-        } else if (e.touches.length === 2) {
-            const dx = e.touches[0].clientX - e.touches[1].clientX;
-            const dy = e.touches[0].clientY - e.touches[1].clientY;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-            const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-            const rect = canvasWrap.getBoundingClientRect();
-            const cx = midX - rect.left;
-            const cy = midY - rect.top;
+        } else if (e.touches.length === 2 && !isViewLocked) {
+            var dx2 = e.touches[0].clientX - e.touches[1].clientX;
+            var dy2 = e.touches[0].clientY - e.touches[1].clientY;
+            var dist = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+            var midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            var midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            var rect = canvasWrap.getBoundingClientRect();
+            var cx = midX - rect.left;
+            var cy = midY - rect.top;
             zoomAtPoint(scale * (dist / lastTouchDist), cx, cy);
             lastTouchDist = dist;
         }
     }, { passive: false });
-    canvasWrap.addEventListener('touchend', function() { isDragging = false; });
 
-    // ── Keyboard shortcuts ──
+    canvasWrap.addEventListener('touchend', function() {
+        if (currentDragNode) {
+            currentDragNode.classList.remove('node-dragging');
+            canvasWrap.classList.remove('node-dragging-active');
+            currentDragNode = null;
+        }
+        isDragging = false;
+    });
+
+    // ═══════════════════════════════════════════
+    //  KEYBOARD SHORTCUTS
+    // ═══════════════════════════════════════════
     window.addEventListener('keydown', function(e) {
+        // Modal escape
         if (document.getElementById('textModal').classList.contains('open')) {
             if (e.key === 'Escape') closeModal();
             return;
         }
-        const tag = (e.target.tagName || '').toLowerCase();
+        var tag = (e.target.tagName || '').toLowerCase();
         if (tag === 'input' || tag === 'textarea') return;
-        const rect = canvasWrap.getBoundingClientRect();
-        const cx = rect.width / 2;
-        const cy = rect.height / 2;
-        switch(e.key) {
+
+        var rect = canvasWrap.getBoundingClientRect();
+        var cx = rect.width / 2;
+        var cy = rect.height / 2;
+
+        switch (e.key) {
             case '+': case '=':
                 zoomAtPoint(scale + ZOOM_STEP, cx, cy); break;
             case '-': case '_':
@@ -567,45 +1397,95 @@ flowchart LR
                 centerView(); break;
             case 't': case 'T':
                 openModal(); break;
+            case 'l': case 'L':
+                var cb = document.getElementById('fixedViewCheck');
+                cb.checked = !cb.checked;
+                toggleFixedView();
+                break;
+            case 'd': case 'D':
+                var cb2 = document.getElementById('dragNodesCheck');
+                cb2.checked = !cb2.checked;
+                toggleDragNodes();
+                break;
+            case '1':
+                setDirection('TB'); break;
+            case '2':
+                setDirection('BT'); break;
+            case '3':
+                setDirection('LR'); break;
+            case '4':
+                setDirection('RL'); break;
         }
     });
 
-    // ── Toolbar buttons ──
+    // ═══════════════════════════════════════════
+    //  TOOLBAR BUTTONS
+    // ═══════════════════════════════════════════
     window.zoomIn = function() {
-        const rect = canvasWrap.getBoundingClientRect();
-        zoomAtPoint(scale + ZOOM_STEP, rect.width/2, rect.height/2);
+        var rect = canvasWrap.getBoundingClientRect();
+        zoomAtPoint(scale + ZOOM_STEP, rect.width / 2, rect.height / 2);
     };
     window.zoomOut = function() {
-        const rect = canvasWrap.getBoundingClientRect();
-        zoomAtPoint(scale - ZOOM_STEP, rect.width/2, rect.height/2);
+        var rect = canvasWrap.getBoundingClientRect();
+        zoomAtPoint(scale - ZOOM_STEP, rect.width / 2, rect.height / 2);
     };
+
     window.resetView = function() {
-        const svg = container.querySelector('svg');
+        if (isViewLocked) return;
+        var svg = container.querySelector('svg');
         if (!svg) return;
-        const wrapRect = canvasWrap.getBoundingClientRect();
-        const svgW = svg.getBoundingClientRect().width / scale;
-        const svgH = svg.getBoundingClientRect().height / scale;
-        const pad = 80;
-        const fitScaleX = (wrapRect.width - pad) / (svgW + 80);
-        const fitScaleY = (wrapRect.height - pad) / (svgH + 80);
-        scale = Math.min(fitScaleX, fitScaleY, 1.5);
-        scale = Math.max(MIN_SCALE, scale);
-        translateX = (wrapRect.width - svgW * scale) / 2 - 40 * scale;
-        translateY = (wrapRect.height - svgH * scale) / 2 - 40 * scale + 40;
+
+        var wrapRect = canvasWrap.getBoundingClientRect();
+        var svgW = svg.getBoundingClientRect().width / scale;
+        var svgH = svg.getBoundingClientRect().height / scale;
+        var pad = 80;
+
+        var fitScaleX = (wrapRect.width - pad) / (svgW + 80);
+        var fitScaleY = (wrapRect.height - pad) / (svgH + 80);
+        var idealScale = Math.min(fitScaleX, fitScaleY, 1.5);
+
+        // Minimum readable scale: never shrink so small text is unreadable
+        var minReadable = 0.45;
+        scale = Math.max(minReadable, idealScale);
+
+        if (idealScale >= minReadable) {
+            // Diagram fits at readable scale — center fully
+            translateX = (wrapRect.width - svgW * scale) / 2 - 40 * scale;
+            translateY = (wrapRect.height - svgH * scale) / 2 - 40 * scale + 40;
+        } else {
+            // Diagram too large for viewport — smart centering
+            // Horizontally: center the diagram
+            translateX = (wrapRect.width - svgW * scale) / 2 - 40 * scale;
+
+            if (currentDirection === 'TB') {
+                // Root at top: show top portion
+                translateY = 100;
+            } else if (currentDirection === 'BT') {
+                // Root at bottom: show bottom portion
+                translateY = wrapRect.height - svgH * scale - 40;
+            } else {
+                translateY = (wrapRect.height - svgH * scale) / 2 - 40 * scale + 40;
+            }
+        }
+
         applyTransform(true);
     };
+
     window.centerView = function() {
-        const svg = container.querySelector('svg');
+        if (isViewLocked) return;
+        var svg = container.querySelector('svg');
         if (!svg) return;
-        const wrapRect = canvasWrap.getBoundingClientRect();
-        const svgW = svg.getBoundingClientRect().width / scale;
-        const svgH = svg.getBoundingClientRect().height / scale;
+        var wrapRect = canvasWrap.getBoundingClientRect();
+        var svgW = svg.getBoundingClientRect().width / scale;
+        var svgH = svg.getBoundingClientRect().height / scale;
         translateX = (wrapRect.width - svgW * scale) / 2 - 40 * scale;
         translateY = (wrapRect.height - svgH * scale) / 2 - 40 * scale + 40;
         applyTransform(true);
     };
 
-    // ── Modal ──
+    // ═══════════════════════════════════════════
+    //  MODAL
+    // ═══════════════════════════════════════════
     window.openModal = function() {
         document.getElementById('textModal').classList.add('open');
     };
@@ -613,21 +1493,24 @@ flowchart LR
         document.getElementById('textModal').classList.remove('open');
     };
     window.copyTree = function() {
-        const pre = document.querySelector('#textModal .modal-body pre');
+        var pre = document.querySelector('#textModal .modal-body pre');
         navigator.clipboard.writeText(pre.textContent).then(function() {
-            const btn = document.querySelector('#textModal .modal-footer button');
-            btn.textContent = 'Copiado';
+            var btn = document.querySelector('#textModal .modal-footer button');
+            btn.textContent = 'Copiado ✓';
             setTimeout(function() { btn.textContent = 'Copiar texto'; }, 1500);
         });
     };
-    // Click outside modal to close
     document.getElementById('textModal').addEventListener('click', function(e) {
         if (e.target === this) closeModal();
     });
 
-    // ── Auto-fit on load ──
+    // ═══════════════════════════════════════════
+    //  INITIAL RENDER
+    // ═══════════════════════════════════════════
     window.addEventListener('load', function() {
-        setTimeout(function() { resetView(); }, 800);
+        setTimeout(function() {
+            renderDiagram();
+        }, 200);
     });
 })();
 </script>
