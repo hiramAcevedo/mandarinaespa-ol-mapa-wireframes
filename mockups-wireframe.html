@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframes - Mandarín a Español</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #e9e9e9;
+            color: #333;
+        }
+
+        /* ── Top nav (shared with mapa-del-sitio) ── */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: #1a1a2e;
+            display: flex;
+            align-items: center;
+            padding: 0;
+            height: 38px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .top-nav .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0 1rem;
+            height: 100%;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            text-decoration: none;
+            color: #D4A843;
+            font-weight: 700;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+        .top-nav .nav-brand .char {
+            width: 22px; height: 22px;
+            background: #C41E3A;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.75rem;
+        }
+        .top-nav a.nav-link {
+            padding: 0 1rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            transition: all 0.15s;
+            border-bottom: 2px solid transparent;
+        }
+        .top-nav a.nav-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .top-nav a.nav-link.active {
+            color: #fff;
+            border-bottom-color: #C41E3A;
+            background: rgba(255,255,255,0.06);
+        }
+
+        /* ── Page tabs ── */
+        .tab-bar {
+            position: sticky;
+            top: 38px;
+            z-index: 50;
+            background: #2a2a42;
+            display: flex;
+            align-items: center;
+            padding: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .tab-bar .brand {
+            padding: 0.55rem 1rem;
+            color: rgba(255,255,255,0.4);
+            font-weight: 600;
+            font-size: 0.72rem;
+            white-space: nowrap;
+            border-right: 1px solid rgba(255,255,255,0.08);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .tab-bar button {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            padding: 0.6rem 1.2rem;
+            cursor: pointer;
+            font-size: 0.78rem;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-bar button:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .tab-bar button.active {
+            color: #fff;
+            border-bottom-color: #C41E3A;
+            background: rgba(255,255,255,0.08);
+        }
+
+        /* ── Page wrapper ── */
+        .page { display: none; padding: 1.5rem; max-width: 900px; margin: 0 auto; }
+        .page.active { display: block; }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .page-title h2 { font-size: 1.3rem; color: #1a1a2e; }
+        .page-title p { font-size: 0.8rem; color: #888; margin-top: 0.25rem; }
+
+        /* ── Wireframe primitives ── */
+        .wire-frame {
+            background: #fff;
+            border: 2px solid #bbb;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .wire-block {
+            border: 2px dashed #ccc;
+            background: #f7f7f7;
+            padding: 0.8rem;
+            margin: 0.6rem;
+            border-radius: 4px;
+            position: relative;
+        }
+        .wire-block .label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #C41E3A;
+            margin-bottom: 0.4rem;
+        }
+        .wire-block .desc {
+            font-size: 0.75rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Color coded blocks */
+        .wire-block.header-block {
+            background: #1a1a2e;
+            border-color: #1a1a2e;
+        }
+        .wire-block.header-block .label { color: #D4A843; }
+        .wire-block.header-block .desc { color: rgba(255,255,255,0.7); }
+
+        .wire-block.hero-block {
+            background: #fef3f4;
+            border-color: #C41E3A;
+            min-height: 80px;
+        }
+
+        .wire-block.dark-block {
+            background: #1a1a2e;
+            border-color: #1a1a2e;
+        }
+        .wire-block.dark-block .label { color: #D4A843; }
+        .wire-block.dark-block .desc { color: rgba(255,255,255,0.6); }
+
+        .wire-block.accent-block {
+            border-color: #D4A843;
+            background: #fffbf0;
+        }
+
+        .wire-block.tool-block {
+            border-color: #4a90d9;
+            background: #f0f6ff;
+        }
+        .wire-block.tool-block .label { color: #2a6cb8; }
+
+        /* Grid helpers */
+        .wire-grid {
+            display: grid;
+            gap: 0.5rem;
+            margin: 0.6rem;
+        }
+        .wire-grid-2 { grid-template-columns: 1fr 1fr; }
+        .wire-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .wire-grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+        .wire-grid-5 { grid-template-columns: 1fr 1fr 1fr 1fr 1fr; }
+
+        /* Placeholder boxes */
+        .placeholder {
+            background: repeating-linear-gradient(
+                45deg, #eee, #eee 5px, #e0e0e0 5px, #e0e0e0 10px
+            );
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: #888;
+            text-align: center;
+            padding: 0.3rem;
+        }
+        .placeholder.tall { height: 100px; }
+        .placeholder.xtall { height: 150px; }
+
+        /* Text line placeholders */
+        .text-line {
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        .text-line.short { width: 60%; }
+        .text-line.med { width: 80%; }
+        .text-line.tiny { width: 40%; }
+
+        /* Button placeholder */
+        .btn-placeholder {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border: 2px solid #C41E3A;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            color: #C41E3A;
+            font-weight: 600;
+            margin-top: 0.3rem;
+            margin-right: 0.3rem;
+        }
+        .btn-placeholder.filled {
+            background: #C41E3A;
+            color: #fff;
+        }
+        .btn-placeholder.gold {
+            border-color: #D4A843;
+            color: #D4A843;
+        }
+
+        /* Nav placeholder */
+        .nav-items {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .nav-items span {
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.5);
+        }
+        .nav-items span.active-link {
+            color: #D4A843;
+            font-weight: 600;
+            border-bottom: 2px solid #D4A843;
+            padding-bottom: 2px;
+        }
+
+        /* Separator */
+        .wire-sep {
+            height: 1px;
+            background: #ddd;
+            margin: 0.6rem;
+        }
+
+        /* Card styles */
+        .card-wire {
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            padding: 0.6rem;
+            background: #fafafa;
+        }
+        .card-wire .card-tag {
+            font-size: 0.55rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #C41E3A;
+            margin-bottom: 0.3rem;
+        }
+
+        /* Footer nav */
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.8rem;
+        }
+        .footer-col .col-title {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #D4A843;
+            margin-bottom: 0.4rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .wire-grid-3, .wire-grid-4, .wire-grid-5 {
+                grid-template-columns: 1fr 1fr;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+            .nav-items { flex-wrap: wrap; gap: 0.5rem; }
+        }
+
+        /* Annotation callout */
+        .annotation {
+            font-size: 0.6rem;
+            color: #C41E3A;
+            font-style: italic;
+            margin-top: 0.2rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ Shared top nav ══ -->
+<div class="top-nav">
+    <a href="mapa-del-sitio.html" class="nav-brand">
+        <span class="char">橘</span> Mandarín a Español
+    </a>
+    <a href="mapa-del-sitio.html" class="nav-link">Mapa del Sitio</a>
+    <a href="mockups-wireframe.html" class="nav-link active">Wireframes</a>
+</div>
+
+<div class="tab-bar">
+    <div class="brand">Páginas</div>
+    <button class="active" onclick="showPage('home', this)">Inicio (Home)</button>
+    <button onclick="showPage('immersion', this)">Inmersión China</button>
+    <button onclick="showPage('hanziflow', this)">HanziFlow</button>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PAGE 1: HOME                                 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+    <div class="page-title">
+        <h2>Página Principal (Home)</h2>
+        <p>mandarinaespañol.com</p>
+    </div>
+
+    <div class="wire-frame">
+
+        <!-- HEADER -->
+        <div class="wire-block header-block">
+            <div class="label">Header (sticky)</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <div style="width:28px;height:28px;background:#C41E3A;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.8rem;">橘</div>
+                    <span style="color:#fff;font-size:0.8rem;font-weight:600;">Mandarín a Español</span>
+                </div>
+                <div class="nav-items">
+                    <span class="active-link">Inicio</span>
+                    <span>Blog</span>
+                    <span>Inmersión</span>
+                    <span>HanziFlow</span>
+                    <span>Recursos</span>
+                    <span>Sobre mí</span>
+                </div>
+                <div class="btn-placeholder filled" style="font-size:0.55rem;">Empieza aquí</div>
+            </div>
+        </div>
+
+        <!-- HERO -->
+        <div class="wire-block hero-block">
+            <div class="label">Hero Section</div>
+            <div style="text-align:center; padding:0.8rem 0;">
+                <div style="font-size:1.1rem; font-weight:700; color:#1a1a2e; margin-bottom:0.3rem;">Aprende chino mandarín desde tu idioma</div>
+                <div class="desc" style="max-width:400px; margin:0 auto;">Recursos originales, herramientas interactivas y un diario de aprendizaje real. Todo en español.</div>
+                <div style="margin-top:0.6rem;">
+                    <span class="btn-placeholder filled">Prueba HanziFlow</span>
+                    <span class="btn-placeholder">Lee el blog</span>
+                </div>
+            </div>
+            <p class="annotation">Fondo: gradiente claro con caracteres chinos en marca de agua (opacidad baja)</p>
+        </div>
+
+        <!-- MI PROGRESO -->
+        <div class="wire-block accent-block">
+            <div class="label">Mi Progreso</div>
+            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                <div>
+                    <div class="desc" style="font-weight:600;">Actualmente: HSK 2, Unidad 4</div>
+                    <div style="margin-top:0.3rem; height:10px; background:#eee; border-radius:5px; width:200px; overflow:hidden;">
+                        <div style="height:100%; width:45%; background: linear-gradient(90deg, #C41E3A, #D4A843); border-radius:5px;"></div>
+                    </div>
+                </div>
+                <div class="desc">Documentando mi aprendizaje cada semana</div>
+            </div>
+        </div>
+
+        <div class="wire-sep"></div>
+
+        <!-- BLOG PREVIEW -->
+        <div style="margin:0.6rem;">
+            <div style="font-size:0.8rem; font-weight:700; color:#1a1a2e; margin-bottom:0.5rem;">Últimas del Blog</div>
+            <div class="wire-grid wire-grid-3">
+                <div class="card-wire">
+                    <div class="card-tag">HSK 2</div>
+                    <div class="text-line med"></div>
+                    <div class="text-line short"></div>
+                    <div class="text-line tiny"></div>
+                    <div class="desc" style="margin-top:0.3rem;">Cómo distinguir los tonos 2 y 3</div>
+                </div>
+                <div class="card-wire">
+                    <div class="card-tag">Personal</div>
+                    <div class="text-line med"></div>
+                    <div class="text-line short"></div>
+                    <div class="text-line tiny"></div>
+                    <div class="desc" style="margin-top:0.3rem;">Mi primer mes con caracteres</div>
+                </div>
+                <div class="card-wire">
+                    <div class="card-tag">Inmersión</div>
+                    <div class="text-line med"></div>
+                    <div class="text-line short"></div>
+                    <div class="text-line tiny"></div>
+                    <div class="desc" style="margin-top:0.3rem;">Apps para inmersión desde México</div>
+                </div>
+            </div>
+            <div style="text-align:right; margin-top:0.3rem;">
+                <span class="btn-placeholder gold" style="font-size:0.55rem;">Ver todas las entradas</span>
+            </div>
+        </div>
+
+        <div class="wire-sep"></div>
+
+        <!-- HERRAMIENTAS -->
+        <div class="wire-block tool-block">
+            <div class="label">Herramientas: HanziFlow</div>
+            <div class="wire-grid wire-grid-2">
+                <div>
+                    <div class="desc" style="font-weight:600; margin-bottom:0.3rem;">Practica la escritura de caracteres chinos</div>
+                    <div class="text-line med"></div>
+                    <div class="text-line short"></div>
+                    <div class="text-line tiny"></div>
+                    <div style="margin-top:0.5rem;">
+                        <span class="btn-placeholder filled" style="font-size:0.55rem;">Probar ahora</span>
+                    </div>
+                </div>
+                <div class="placeholder tall">[Captura de pantalla HanziFlow]</div>
+            </div>
+        </div>
+
+        <div class="wire-sep"></div>
+
+        <!-- INMERSIÓN TEASER -->
+        <div style="margin:0.6rem;">
+            <div style="font-size:0.8rem; font-weight:700; color:#1a1a2e; margin-bottom:0.3rem;">Zona de Inmersión</div>
+            <div class="desc" style="margin-bottom:0.5rem;">Accede a contenido real en chino: series, podcasts, manga, redes sociales y más.</div>
+            <div class="wire-grid wire-grid-4">
+                <div class="placeholder">Audiovisual</div>
+                <div class="placeholder">Podcasts y Música</div>
+                <div class="placeholder">Lectura</div>
+                <div class="placeholder">Redes Sociales</div>
+            </div>
+            <div style="text-align:center; margin-top:0.4rem;">
+                <span class="btn-placeholder" style="font-size:0.55rem;">Explorar todo</span>
+            </div>
+        </div>
+
+        <div class="wire-sep"></div>
+
+        <!-- NEWSLETTER -->
+        <div class="wire-block dark-block">
+            <div class="label">Newsletter</div>
+            <div style="text-align:center; padding:0.5rem 0;">
+                <div style="color:#fff; font-size:0.85rem; font-weight:600;">Recibe recursos cada semana</div>
+                <div class="desc" style="margin:0.3rem 0;">Guías, vocabulario y consejos directo a tu correo.</div>
+                <div style="display:flex; gap:0.3rem; justify-content:center; margin-top:0.4rem;">
+                    <div style="border:1px solid rgba(255,255,255,0.3);border-radius:4px;padding:0.3rem 0.8rem;font-size:0.65rem;color:rgba(255,255,255,0.4);min-width:160px;">tu@email.com</div>
+                    <span class="btn-placeholder filled" style="font-size:0.55rem;">Suscribirme</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="wire-block" style="background:#f0f0f0; border-color:#ddd;">
+            <div class="label">Footer</div>
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="col-title">Enlaces rápidos</div>
+                    <div class="text-line tiny"></div>
+                    <div class="text-line tiny"></div>
+                    <div class="text-line tiny"></div>
+                </div>
+                <div class="footer-col">
+                    <div class="col-title">Recursos</div>
+                    <div class="text-line tiny"></div>
+                    <div class="text-line tiny"></div>
+                </div>
+                <div class="footer-col">
+                    <div class="col-title">Contacto</div>
+                    <div class="text-line tiny"></div>
+                    <div class="text-line tiny"></div>
+                </div>
+            </div>
+            <div class="desc" style="text-align:center; margin-top:0.5rem; font-size:0.6rem;">2026 Mandarín a Español. Proyecto educativo de Hiram Acevedo</div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PAGE 2: INMERSIÓN CHINA                      -->
+<!-- ════════════════════════════════════════════ -->
+<div class="page" id="page-immersion">
+    <div class="page-title">
+        <h2>Zona de Inmersión</h2>
+        <p>mandarinaespañol.com/inmersion</p>
+    </div>
+
+    <div class="wire-frame">
+
+        <!-- HEADER (same across pages) -->
+        <div class="wire-block header-block">
+            <div class="label">Header (sticky)</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <div style="width:28px;height:28px;background:#C41E3A;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.8rem;">橘</div>
+                    <span style="color:#fff;font-size:0.8rem;font-weight:600;">Mandarín a Español</span>
+                </div>
+                <div class="nav-items">
+                    <span>Inicio</span>
+                    <span>Blog</span>
+                    <span class="active-link">Inmersión</span>
+                    <span>HanziFlow</span>
+                    <span>Recursos</span>
+                    <span>Sobre mí</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE HEADER -->
+        <div class="wire-block hero-block" style="min-height:auto;">
+            <div class="label">Cabecera de página</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                <div>
+                    <div style="font-size:0.6rem; color:#888;">Inicio &gt; Inmersión</div>
+                    <div style="font-size:1rem; font-weight:700; color:#1a1a2e;">Zona de Inmersión 沉浸区</div>
+                    <div class="desc">El acceso a contenido real en chino es difícil desde occidente. Aquí recopilo todo lo que he encontrado.</div>
+                </div>
+                <div style="display:flex; gap:0.3rem;">
+                    <div style="border:1px solid #ccc; border-radius:4px; padding:0.25rem 0.6rem; font-size:0.6rem; color:#888; min-width:120px;">Buscar recurso...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILTER TABS -->
+        <div style="margin:0.6rem; display:flex; gap:0.4rem; flex-wrap:wrap;">
+            <span class="btn-placeholder filled" style="font-size:0.55rem;">Todos</span>
+            <span class="btn-placeholder" style="font-size:0.55rem;">Audiovisual</span>
+            <span class="btn-placeholder" style="font-size:0.55rem;">Audio</span>
+            <span class="btn-placeholder" style="font-size:0.55rem;">Lectura</span>
+            <span class="btn-placeholder" style="font-size:0.55rem;">Redes Sociales</span>
+            <span class="btn-placeholder" style="font-size:0.55rem;">Apps</span>
+        </div>
+
+        <div class="wire-sep"></div>
+
+        <!-- AUDIOVISUAL -->
+        <div style="margin:0.6rem;">
+            <div style="font-size:0.8rem; font-weight:700; color:#C41E3A; margin-bottom:0.3rem;">Contenido Audiovisual</div>
+            <div class="desc" style="margin-bottom:0.5rem;">Programas de TV, YouTube, anime, series, películas y documentales en chino mandarín.</div>
+            <div class="wire-grid wire-grid-5">
+                <div class="card-wire" style="text-align:center;">
+                    <div class="placeholder" style="height:40px;">TV</div>
+                    <div class="desc" style="margin-top:0.2rem;">Programas</div>
+                </div>
+                <div class="card-wire" style="text-align:center;">
+                    <div class="placeholder" style="height:40px;">YT</div>
+                    <div class="desc" style="margin-top:0.2rem;">YouTube</div>
+                </div>
+                <div class="card-wire" style="text-align:center;">
+                    <div class="placeholder" style="height:40px;">动漫</div>
+                    <div class="desc" style="margin-top:0.2rem;">Anime</div>
+                </div>
+                <div class="card-wire" style="text-align:center;">
+                    <div class="placeholder" style="height:40px;">电影</div>
+                    <div class="desc" style="margin-top:0.2rem;">Series / Películas</div>
+                </div>
+                <div class="card-wire" style="text-align:center;">
+                    <div class="placeholder" style="height:40px;">纪录</div>
+                    <div class="desc" style="margin-top:0.2rem;">Documentales</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wire-sep"></div>
+
+        <!-- AUDIO -->
+        <div style="margin:0.6rem;">
+            <div style="font-size:0.8rem; font-weight:700; color:#C41E3A; margin-bottom:0.3rem;">Audio</div>
+            <div class="desc" style="margin-bottom:0.5rem;">Podcasts, música y apps de audio en mandarín.</div>
+            <div class="wire-grid wire-grid-3">
+                <div class="card-wire">
+                    <div class="card-tag">Podcasts</div>
+                    <div class="placeholder" style="height:35px;">Lista de podcasts recomendados</div>
+                </div>
+                <div class="card-wire">
+                    <div class="card-tag">Música</div>
+                    <div class="placeholder" style="height:35px;">QQ音乐, NetEase Music</div>
+                </div>
+                <div class="card-wire">
+                    <div class="card-tag">Apps</div>
+                    <div class="placeholder" style="height:35px;">喜马拉雅 Himalaya, etc.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wire-sep"></div>
+
+        <!-- LECTURA -->
+        <div style="margin:0.6rem;">
+            <div style="font-size:0.8rem; font-weight:700; color:#C41E3A; margin-bottom:0.3rem;">Lectura</div>
+            <div class="wire-grid wire-grid-5">
+                <div class="card-wire" style="text-align:center;">
+                    <div class="placeholder" style="height:40px;">漫画</div>
+                    <div class="desc" style="margin-top:0.2rem;">Manga / Manhua</div>
+                </div>
+                <div class="card-wire" style="text-align:center;">
+                    <div class="placeholder" style="height:40px;">书</div>
+                    <div class="desc" style="margin-top:0.2rem;">Libros</div>
+                </div>
+                <div class="card-wire" style="text-align:center;">
+                    <div class="placeholder" style="height:40px;">故事</div>
+                    <div class="desc" style="margin-top:0.2rem;">Historias cortas</div>
+                </div>
+                <div class="card-wire" style="text-align:center;">
+                    <div class="placeholder" style="height:40px;">诗</div>
+                    <div class="desc" style="margin-top:0.2rem;">Poemas</div>
+                </div>
+                <div class="card-wire" style="text-align:center;">
+                    <div class="placeholder" style="height:40px;">杂志</div>
+                    <div class="desc" style="margin-top:0.2rem;">Revistas</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wire-sep"></div>
+
+        <!-- REDES SOCIALES -->
+        <div style="margin:0.6rem;">
+            <div style="font-size:0.8rem; font-weight:700; color:#C41E3A; margin-bottom:0.3rem;">Redes Sociales Chinas</div>
+            <div class="desc" style="margin-bottom:0.5rem;">Plataformas reales donde puedes sumergirte en contenido nativo.</div>
+            <div class="wire-grid wire-grid-4">
+                <div class="card-wire" style="text-align:center; border-color:#ff2442;">
+                    <div style="font-weight:700; font-size:0.75rem;">小红书</div>
+                    <div class="desc">RedNote</div>
+                </div>
+                <div class="card-wire" style="text-align:center; border-color:#e6162d;">
+                    <div style="font-weight:700; font-size:0.75rem;">微博</div>
+                    <div class="desc">Weibo</div>
+                </div>
+                <div class="card-wire" style="text-align:center; border-color:#161823;">
+                    <div style="font-weight:700; font-size:0.75rem;">抖音</div>
+                    <div class="desc">Douyin</div>
+                </div>
+                <div class="card-wire" style="text-align:center; border-color:#00a1d6;">
+                    <div style="font-weight:700; font-size:0.75rem;">哔哩哔哩</div>
+                    <div class="desc">Bilibili</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wire-sep"></div>
+
+        <!-- APPS -->
+        <div class="wire-block accent-block">
+            <div class="label">Apps y Herramientas Recomendadas</div>
+            <div class="wire-grid wire-grid-3">
+                <div class="placeholder">Diccionarios (Pleco, etc.)</div>
+                <div class="placeholder">Flashcards (Anki decks)</div>
+                <div class="placeholder">Teclados / Input methods</div>
+            </div>
+        </div>
+
+        <!-- FOOTER (simplified) -->
+        <div class="wire-block" style="background:#f0f0f0; border-color:#ddd;">
+            <div class="label">Footer</div>
+            <div class="desc" style="text-align:center;">[ Mismo footer que Home ]</div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PAGE 3: HANZIFLOW                            -->
+<!-- ════════════════════════════════════════════ -->
+<div class="page" id="page-hanziflow">
+    <div class="page-title">
+        <h2>HanziFlow (Herramienta)</h2>
+        <p>mandarinaespañol.com/herramientas/hanziflow</p>
+    </div>
+
+    <div class="wire-frame">
+
+        <!-- HEADER -->
+        <div class="wire-block header-block">
+            <div class="label">Header (sticky)</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <div style="width:28px;height:28px;background:#C41E3A;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.8rem;">橘</div>
+                    <span style="color:#fff;font-size:0.8rem;font-weight:600;">Mandarín a Español</span>
+                </div>
+                <div class="nav-items">
+                    <span>Inicio</span>
+                    <span>Blog</span>
+                    <span>Inmersión</span>
+                    <span class="active-link">HanziFlow</span>
+                    <span>Recursos</span>
+                    <span>Sobre mí</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE HEADER -->
+        <div class="wire-block" style="border-color: #4a90d9; background: #f0f6ff;">
+            <div style="font-size:0.6rem; color:#888;">Inicio &gt; Herramientas &gt; HanziFlow</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem; margin-top:0.3rem;">
+                <div>
+                    <div style="font-size:1rem; font-weight:700; color:#1a1a2e;">HanziFlow: Practica la Escritura <span style="color:#888; font-weight:400;">汉字练习</span></div>
+                    <div class="desc">Escribe texto en chino y practica el orden de trazos de cada carácter con retroalimentación visual.</div>
+                </div>
+                <div style="display:flex; gap:0.3rem;">
+                    <span style="background:#d4edda; color:#155724; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.6rem; font-weight:600;">Gratuito</span>
+                    <span style="background:#cce5ff; color:#004085; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.6rem; font-weight:600;">Sin registro</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- EMBEDDED APP -->
+        <div class="wire-block tool-block" style="border-width:3px;">
+            <div class="label" style="display:flex; justify-content:space-between;">
+                <span>App Embebida (iframe / Next.js)</span>
+                <span style="font-size:0.55rem; color:#888; font-weight:400;">HanziFlow v0.1.0</span>
+            </div>
+
+            <!-- Input area -->
+            <div style="margin-top:0.5rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
+                    <div class="desc" style="font-weight:600;">Escribe tu texto en chino</div>
+                    <span style="font-size:0.55rem; color:#888; cursor:pointer;">Limpiar</span>
+                </div>
+                <div style="border:2px solid #ddd; border-radius:6px; padding:0.5rem; min-height:50px; background:#fff; font-size:0.8rem; color:#333;">
+                    你好，很高兴认识你。你叫什么名字？
+                </div>
+                <div style="display:flex; gap:0.3rem; margin-top:0.3rem; flex-wrap:wrap;">
+                    <span style="font-size:0.55rem; color:#aaa;">Ejemplos:</span>
+                    <span style="background:#f0f0f0; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.55rem; color:#666;">Saludos básicos</span>
+                    <span style="background:#f0f0f0; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.55rem; color:#666;">Presentación</span>
+                    <span style="background:#f0f0f0; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.55rem; color:#666;">Familia</span>
+                    <span style="background:#f0f0f0; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.55rem; color:#666;">Comida</span>
+                </div>
+            </div>
+
+            <div class="wire-sep"></div>
+
+            <!-- Character grid + viewer side by side -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
+                <div class="desc" style="font-weight:600;">Caracteres</div>
+                <span style="font-size:0.55rem; color:#888;">12 caracteres</span>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 200px; gap:0.6rem;">
+                <!-- Grid -->
+                <div style="background:#fff; border:1px solid #e5e5e5; border-radius:8px; padding:0.5rem;">
+                    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap:0.3rem;">
+                        <div style="width:42px;height:42px;border:2px solid #eee;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:#fafafa;">你</div>
+                        <div style="width:42px;height:42px;border:2px solid #C41E3A;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:#fef3f4;font-weight:700;box-shadow:0 0 0 2px rgba(196,30,58,0.15);">好</div>
+                        <div style="width:42px;height:42px;border:2px solid #eee;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:#fafafa;">很</div>
+                        <div style="width:42px;height:42px;border:2px solid #eee;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:#fafafa;">高</div>
+                        <div style="width:42px;height:42px;border:2px solid #eee;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:#fafafa;">兴</div>
+                        <div style="width:42px;height:42px;border:2px solid #eee;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:#fafafa;">认</div>
+                        <div style="width:42px;height:42px;border:2px solid #eee;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:#fafafa;">识</div>
+                        <div style="width:42px;height:42px;border:2px solid #eee;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:#fafafa;">你</div>
+                    </div>
+                    <p class="annotation" style="margin-top:0.4rem;">Cada carácter es clickeable. El seleccionado (好) se resalta en rojo.</p>
+                </div>
+
+                <!-- Stroke viewer -->
+                <div style="background:#fff; border:1px solid #e5e5e5; border-radius:8px; padding:0.5rem; text-align:center;">
+                    <div style="font-size:0.6rem; color:#888; margin-bottom:0.3rem;">Visor de trazos</div>
+                    <div style="width:100px;height:100px;border:2px solid #ddd;border-radius:8px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:3rem;color:#1a1a2e;background:#fafafa;">好</div>
+                    <div style="display:flex; gap:0.2rem; justify-content:center; margin-top:0.4rem; flex-wrap:wrap;">
+                        <span class="btn-placeholder filled" style="font-size:0.5rem;">Reproducir</span>
+                        <span class="btn-placeholder" style="font-size:0.5rem;">Practicar</span>
+                        <span class="btn-placeholder" style="font-size:0.5rem;border-color:#aaa;color:#aaa;">Contorno</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOW TO USE -->
+        <div style="margin:0.6rem;">
+            <div style="font-size:0.8rem; font-weight:700; color:#1a1a2e; margin-bottom:0.5rem;">Cómo usar</div>
+            <div class="wire-grid wire-grid-4">
+                <div class="card-wire" style="text-align:center;">
+                    <div style="width:24px;height:24px;background:#C41E3A;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;margin:0 auto 0.3rem;">1</div>
+                    <div class="desc" style="font-weight:600;">Escribe</div>
+                    <div class="desc">Pega o escribe texto en chino</div>
+                </div>
+                <div class="card-wire" style="text-align:center;">
+                    <div style="width:24px;height:24px;background:#C41E3A;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;margin:0 auto 0.3rem;">2</div>
+                    <div class="desc" style="font-weight:600;">Selecciona</div>
+                    <div class="desc">Haz clic en un carácter</div>
+                </div>
+                <div class="card-wire" style="text-align:center;">
+                    <div style="width:24px;height:24px;background:#C41E3A;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;margin:0 auto 0.3rem;">3</div>
+                    <div class="desc" style="font-weight:600;">Observa</div>
+                    <div class="desc">Mira la animación de trazos</div>
+                </div>
+                <div class="card-wire" style="text-align:center;">
+                    <div style="width:24px;height:24px;background:#C41E3A;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;margin:0 auto 0.3rem;">4</div>
+                    <div class="desc" style="font-weight:600;">Practica</div>
+                    <div class="desc">Dibuja y recibe retroalimentación</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SHORTCUTS -->
+        <div class="wire-block" style="background:#f9f9f9;">
+            <div class="label">Atajos de teclado</div>
+            <div style="display:flex; gap:1rem; flex-wrap:wrap; font-size:0.65rem;">
+                <span><kbd style="background:#e0e0e0;padding:0.1rem 0.3rem;border-radius:3px;font-family:monospace;">←</kbd> <kbd style="background:#e0e0e0;padding:0.1rem 0.3rem;border-radius:3px;font-family:monospace;">→</kbd> Navegar</span>
+                <span><kbd style="background:#e0e0e0;padding:0.1rem 0.3rem;border-radius:3px;font-family:monospace;">ESPACIO</kbd> Siguiente</span>
+                <span><kbd style="background:#e0e0e0;padding:0.1rem 0.3rem;border-radius:3px;font-family:monospace;">ESC</kbd> Cerrar visor</span>
+            </div>
+        </div>
+
+        <!-- PRÓXIMAMENTE -->
+        <div class="wire-block accent-block">
+            <div class="label">Próximamente</div>
+            <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">
+                <span style="background:#fff;border:1px solid #D4A843;padding:0.15rem 0.5rem;border-radius:10px;font-size:0.55rem;color:#B38A2D;">Diccionario integrado</span>
+                <span style="background:#fff;border:1px solid #D4A843;padding:0.15rem 0.5rem;border-radius:10px;font-size:0.55rem;color:#B38A2D;">Flashcards SRS</span>
+                <span style="background:#fff;border:1px solid #D4A843;padding:0.15rem 0.5rem;border-radius:10px;font-size:0.55rem;color:#B38A2D;">Progreso guardado</span>
+                <span style="background:#fff;border:1px solid #D4A843;padding:0.15rem 0.5rem;border-radius:10px;font-size:0.55rem;color:#B38A2D;">Listas HSK</span>
+                <span style="background:#fff;border:1px solid #D4A843;padding:0.15rem 0.5rem;border-radius:10px;font-size:0.55rem;color:#B38A2D;">Audio / TTS</span>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="wire-block" style="background:#f0f0f0; border-color:#ddd;">
+            <div class="label">Footer</div>
+            <div class="desc" style="text-align:center;">[ Mismo footer que Home ]</div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showPage(id, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
